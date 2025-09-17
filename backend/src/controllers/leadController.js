@@ -4,6 +4,11 @@ import Status from '../models/Status.js';
 import Note from '../models/Note.js';
 import FollowUp from '../models/FollowUp.js';
 import Attachment from '../models/Attachment.js';
+<<<<<<< HEAD
+=======
+import csv from 'csv-parser';
+import { Readable } from 'stream';
+>>>>>>> 7014ba474bf99e218ee2c5a6a32fd6a5cc923b0e
 
 const canSeeLead = (req, lead) => {
   const role = req.user.roleName;
@@ -159,3 +164,70 @@ export const uploadAttachment = async (req, res) => {
   });
   res.status(201).json(doc);
 };
+<<<<<<< HEAD
+=======
+
+export const importLeads = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    const source = req.body?.source?.toString().trim();
+    if (!source) return res.status(400).json({ error: 'Source is required' });
+
+    let statusDoc = await Status.findOne({ name: 'New' });
+    if (!statusDoc) {
+      statusDoc = await Status.create({ name: 'New', color: '#10b981' });
+    }
+
+    const rows = [];
+    const errors = [];
+    const toLeadDoc = (row) => {
+      const name = (row.name || row.Name || row.fullname || '').toString().trim();
+      const phone = (row.phone || row.Phone || row.mobile || '').toString().trim();
+      const email = (row.email || row.Email || '').toString().trim() || undefined;
+      const city = (row.city || row.City || '').toString().trim() || undefined;
+
+      if (!name) return { error: 'Missing name' };
+      if (!phone) return { error: 'Missing phone' };
+      // basic phone validation: 7-15 digits allowing +, space, -
+      const normalized = phone.replace(/[^0-9]/g, '');
+      if (normalized.length < 7 || normalized.length > 15) return { error: 'Invalid phone' };
+
+      return {
+        name,
+        phone,
+        email,
+        city,
+        source,
+        status: statusDoc._id,
+        history: [{ status: statusDoc._id, by: req.user.userId, at: new Date() }]
+      };
+    };
+
+    await new Promise((resolve, reject) => {
+      const stream = Readable.from(req.file.buffer);
+      stream
+        .pipe(csv())
+        .on('data', (row) => {
+          const doc = toLeadDoc(row);
+          if (doc.error) {
+            errors.push({ row, error: doc.error });
+          } else {
+            rows.push(doc);
+          }
+        })
+        .on('end', resolve)
+        .on('error', reject);
+    });
+
+    if (rows.length === 0) {
+      return res.status(200).json({ inserted: 0, skipped: errors.length, errors });
+    }
+
+    const inserted = await Lead.insertMany(rows, { ordered: false });
+    res.status(201).json({ inserted: inserted.length, skipped: errors.length, errors });
+  } catch (e) {
+    console.error('Import failed:', e);
+    res.status(500).json({ error: 'Import failed' });
+  }
+};
+>>>>>>> 7014ba474bf99e218ee2c5a6a32fd6a5cc923b0e

@@ -2,7 +2,11 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import { authRequired, permit } from '../middleware/auth.js';
+<<<<<<< HEAD
 import { listLeads, getLead, createLead, updateLead, changeStatus, addNote, createFollowUp, listFollowUps, uploadAttachment } from '../controllers/leadController.js';
+=======
+import { listLeads, getLead, createLead, updateLead, changeStatus, addNote, createFollowUp, listFollowUps, uploadAttachment, importLeads } from '../controllers/leadController.js';
+>>>>>>> 7014ba474bf99e218ee2c5a6a32fd6a5cc923b0e
 
 const router = Router();
 
@@ -21,7 +25,13 @@ const storage = multer.diskStorage({
   filename: (req,file,cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g,'_'))
 });
 const upload = multer({ storage });
+<<<<<<< HEAD
 router.post('/:id/attachments', authRequired, upload.single('file'), uploadAttachment);
+=======
+const memoryUpload = multer({ storage: multer.memoryStorage() });
+router.post('/:id/attachments', authRequired, upload.single('file'), uploadAttachment);
+router.post('/import/csv', authRequired, permit('Admin','Sales Head','Sales Head Manager'), memoryUpload.single('file'), importLeads);
+>>>>>>> 7014ba474bf99e218ee2c5a6a32fd6a5cc923b0e
 router.delete('/:id', authRequired, permit('Admin','Sales Head','Sales Head Manager'), async (req, res) => {
   try {
     const lead = await (await import('../models/Lead.js')).default.findByIdAndDelete(req.params.id);

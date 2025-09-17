@@ -16,7 +16,11 @@ api.interceptors.response.use(
   err => {
     if(err.response && err.response.status === 401){
       clearToken()
+<<<<<<< HEAD
       window.location.href = '/login'
+=======
+      window.location.href = '/login/select'
+>>>>>>> 7014ba474bf99e218ee2c5a6a32fd6a5cc923b0e
     }
     return Promise.reject(err)
   }

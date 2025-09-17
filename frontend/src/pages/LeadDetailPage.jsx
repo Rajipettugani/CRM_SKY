@@ -16,7 +16,11 @@ export default function LeadDetailPage(){
     mutationFn: async (payload) => (await api.post(`/leads/${id}/status`, payload)).data,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['lead',id] });
+<<<<<<< HEAD
       qc.invalidateQueries({ queryKey: ['leads'] }); 
+=======
+      qc.invalidateQueries({ queryKey: ['leads'] }); // Refresh leads table in dashboard
+>>>>>>> 7014ba474bf99e218ee2c5a6a32fd6a5cc923b0e
     }
   })
 
@@ -78,7 +82,11 @@ export default function LeadDetailPage(){
               updateLead.mutate(editForm, {
                 onSuccess: () => {
                   qc.invalidateQueries({ queryKey: ['leads'] });
+<<<<<<< HEAD
                   
+=======
+                  // Redirect based on role
+>>>>>>> 7014ba474bf99e218ee2c5a6a32fd6a5cc923b0e
                   const user = JSON.parse(localStorage.getItem('user'));
                   if (user?.roleName === 'Sales Representative') {
                     navigate('/salesrep');
